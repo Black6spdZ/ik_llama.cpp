@@ -1,0 +1,51 @@
+name: IK-Llama-Pascal-P100-Ultimate
+on: workflow_dispatch
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Code (Iwan's Fork)
+      uses: actions/checkout@v4
+      with:
+        repository: ikawrakow/ik_llama.cpp  # <--- The Fork with -sm graph
+        ref: master
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Install CUDA Toolkit 12.4
+      uses: Jimver/cuda-toolkit@v0.2.19
+      with:
+        cuda: '12.4.0'
+        method: 'network'
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure CMake (Pascal + I-Quants)
+      shell: cmd
+      run: |
+        cmake -B build -G "Visual Studio 17 2022" -A x64 ^
+          -DGGML_CUDA=ON ^
+          -DCMAKE_CUDA_ARCHITECTURES=60 ^
+          -DGGML_CUDA_F16=ON ^
+          -DGGML_CUDA_FORCE_MMQ=OFF ^
+          -DGGML_CUDA_FA_ALL_QUANTS=ON ^
+          -DGGML_IQK_FA_ALL_QUANTS=ON ^
+          -DLLAMA_NATIVE=OFF ^
+          -DGGML_AVX2=ON ^
+          -DGGML_FMA=ON ^
+          -DGGML_F16C=ON ^
+          -DGGML_LTO=ON ^
+          -DCMAKE_CUDA_COMPILER="%CUDA_PATH%/bin/nvcc.exe" ^
+          -DBUILD_SHARED_LIBS=OFF ^
+          -DLLAMA_CURL=OFF
+
+    - name: Build ik_llama (Parallel)
+      run: cmake --build build --config Release -j 4
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ik-llama-pascal-p100
+        path: build/bin/Release/*.exe
