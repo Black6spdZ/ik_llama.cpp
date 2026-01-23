@@ -9,7 +9,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: ikawrakow/ik_llama.cpp  # <--- The Fork with -sm graph
-        ref: master
+        ref: main
         submodules: recursive
         fetch-depth: 0
 
