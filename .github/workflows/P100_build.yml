@@ -39,6 +39,9 @@ jobs:
           -DGGML_LTO=ON ^
           -DCMAKE_CUDA_COMPILER="%CUDA_PATH%/bin/nvcc.exe" ^
           -DBUILD_SHARED_LIBS=OFF ^
+          -DLLAMA_LTO=OFF ^
+          -DGGML_BUILD_TESTS=OFF ^
+          -DGGML_BUILD_EXAMPLES=OFF ^
           -DLLAMA_CURL=OFF
 
     - name: Build ik_llama (Parallel)
