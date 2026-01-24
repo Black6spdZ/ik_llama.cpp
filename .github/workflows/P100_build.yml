@@ -36,10 +36,10 @@ jobs:
           -DGGML_AVX2=ON ^
           -DGGML_FMA=ON ^
           -DGGML_F16C=ON ^
-          -DGGML_LTO=ON ^
           -DCMAKE_CUDA_COMPILER="%CUDA_PATH%/bin/nvcc.exe" ^
           -DBUILD_SHARED_LIBS=OFF ^
           -DLLAMA_LTO=OFF ^
+          -DGGML_LTO=OFF ^
           -DGGML_BUILD_TESTS=OFF ^
           -DGGML_BUILD_EXAMPLES=OFF ^
           -DLLAMA_CURL=OFF
