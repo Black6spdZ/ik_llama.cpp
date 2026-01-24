@@ -45,7 +45,7 @@ jobs:
           -DLLAMA_CURL=OFF
 
     - name: Build ik_llama (Parallel)
-      run: cmake --build build --config Release -j 4
+      run: cmake --build build --config Release --target llama-server -j 8
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
