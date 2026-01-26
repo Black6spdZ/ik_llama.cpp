@@ -13,6 +13,7 @@
 #include "fattn-mma-f16-interface.cuh"
 #include "fattn-new-mma.cuh"
 #include "fattn.cuh"
+#include "convert.cuh"
 
 #include <cstdint>
 
@@ -106,6 +107,7 @@ void ggml_cuda_flash_attn_ext(ggml_backend_cuda_context & ctx, ggml_tensor * dst
     // Hence, we use it only for DeepSeek with MLA enabled, where head sizes are 576, 512,
     // so no other implementation works.
     //
+
     if (new_mma_available(cc) && ((K->ne[0] == 576 && V->ne[0] == 512) || (K->ne[0] == 192 && V->ne[0] == 128 && mma_better_than_turing(cc)))) {
         //printf("Using ggml_cuda_flash_attn_ext_mma_new\n");
         ggml_cuda_flash_attn_ext_mma_new(ctx, dst);
