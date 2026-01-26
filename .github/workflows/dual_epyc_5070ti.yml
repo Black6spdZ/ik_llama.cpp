@@ -14,7 +14,7 @@ jobs:
         fetch-depth: 0
 
     - name: Install CUDA Toolkit 13.1
-      uses: Jimver/cuda-toolkit@v0.2.21  # Check for latest action version
+      uses: Jimver/cuda-toolkit@v0.2.30  # Check for latest action version
       with:
         cuda: '13.1.0'                   # CRITICAL: Targets Blackwell Native
         method: 'network'
