@@ -52,6 +52,9 @@ jobs:
     - name: Build ik_llama (Parallel)
       run: cmake --build build --config Release --target llama-server -j 8
 
+    - name: Build llama-bench
+      run: cmake --build build --config Release --target llama-bench -j 8
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
