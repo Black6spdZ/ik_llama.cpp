@@ -23,7 +23,6 @@ jobs:
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    # OpenBLAS for CPU-side matrix ops on the large CPU-resident layers
     - name: Install OpenBLAS via vcpkg
       shell: cmd
       run: |
@@ -42,24 +41,16 @@ jobs:
           -DGGML_FLASH_ATTN=ON ^
           -DGGML_CUDA_FA_ALL_QUANTS=ON ^
           -DGGML_IQK_FA_ALL_QUANTS=ON ^
-          ^
           -DGGML_STATIC=ON ^
           -DBUILD_SHARED_LIBS=OFF ^
-          ^
           -DCUDAToolkit_ROOT="%CUDA_PATH%" ^
           -DCMAKE_CUDA_COMPILER="%CUDA_PATH%/bin/nvcc.exe" ^
           -DCMAKE_CUDA_FLAGS="-cudart static --threads 4" ^
-          ^
           -DGGML_BLAS=ON ^
           -DGGML_BLAS_VENDOR=OpenBLAS ^
           -DBLAS_LIBRARIES="%OPENBLAS_LIB%" ^
           -DBLAS_INCLUDE_DIRS="%OPENBLAS_INCLUDE%" ^
-          ^
-          :: FIXED back to OFF - GitHub runners are Intel, not Zen 3.
-          :: NATIVE=ON here would bake Intel codegen into the binary.
           -DLLAMA_NATIVE=OFF ^
-          ^
-          :: Explicit Zen 3 ISA flags (AVX2 is the ceiling for Milan)
           -DGGML_AVX2=ON ^
           -DGGML_FMA=ON ^
           -DGGML_F16C=ON ^
@@ -67,7 +58,6 @@ jobs:
           -DGGML_AVX512_VNNI=OFF ^
           -DGGML_AVX512_VBMI=OFF ^
           -DGGML_AVX512_BF16=OFF ^
-          ^
           -DLLAMA_LTO=OFF ^
           -DGGML_LTO=OFF ^
           -DGGML_BUILD_TESTS=OFF ^
