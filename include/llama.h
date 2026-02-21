@@ -627,6 +627,12 @@ extern "C" {
     // to the decoder to start generating output sequence. For other models, it returns -1.
     LLAMA_API llama_token llama_model_decoder_start_token(const struct llama_model * model);
 
+    // Returns true if the model is recurrent (like Mamba, RWKV, etc.)
+    LLAMA_API bool llama_model_is_recurrent(const struct llama_model * model);
+
+    // Returns true if the model is hybrid (like Jamba, Granite, etc.)
+    LLAMA_API bool llama_model_is_hybrid(const struct llama_model * model);
+
     // Returns 0 on success
     LLAMA_API uint32_t llama_model_quantize(
             const char * fname_inp,
@@ -1381,6 +1387,8 @@ LLAMA_API struct llama_grammar* llama_sampler_init_grammar_lazy_patterns(
     void llama_sample_adaptive_p(struct llama_context * ctx,
                                llama_token_data_array * candidates,
                       struct llama_sampler_adaptive_p * adapt_p_ctx);
+
+    void llama_review_adaptive_p(struct llama_sampler_adaptive_p * adapt_p_ctx, const bool record, const bool rewind);
 
 
     /// @details Mirostat 1.0 algorithm described in the paper https://arxiv.org/abs/2007.14966. Uses tokens instead of words.
