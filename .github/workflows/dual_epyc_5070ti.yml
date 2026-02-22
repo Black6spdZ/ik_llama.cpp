@@ -13,10 +13,10 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
-    - name: Install CUDA Toolkit 12.8
+    - name: Install CUDA Toolkit 13.1
       uses: Jimver/cuda-toolkit@v0.2.30  # Check for latest action version
       with:
-        cuda: '12.8.0'                   # CRITICAL: Targets Blackwell Native
+        cuda: '13.1.0'                   # CRITICAL: Targets Blackwell Native
         method: 'network'
 
     - name: Setup MSVC
@@ -27,20 +27,22 @@ jobs:
       run: |
         cmake -B build -G "Visual Studio 17 2022" -A x64 ^
           -DGGML_CUDA=ON ^
-          -DCMAKE_CUDA_ARCHITECTURES="86;89;120" ^
+          -DCMAKE_CUDA_ARCHITECTURES="89-real;120-virtual" ^
           -DGGML_CUDA_F16=ON ^
           -DGGML_FLASH_ATTN=ON ^
           -DGGML_CUDA_FA_ALL_QUANTS=ON ^
           -DGGML_IQK_FA_ALL_QUANTS=ON ^
-          -DGGML_STATIC=ON ^
-          -DBUILD_SHARED_LIBS=OFF ^
-          -DLLAMA_NATIVE=ON ^
-          -DCMAKE_CXX_FLAGS="/arch:AVX2" ^
-          -DCMAKE_C_FLAGS="/arch:AVX2" ^
           -DGGML_AVX2=ON ^
           -DGGML_FMA=ON ^
           -DGGML_F16C=ON ^
           -DGGML_AVX512=OFF ^
+          -DGGML_NATIVE=OFF ^
+          -DGGML_CPU_ALL_VARIANTS=OFF ^
+          -DGGML_OPENMP=ON ^
+          -DGGML_STATIC=ON ^
+          -DBUILD_SHARED_LIBS=OFF ^
+          -DCMAKE_CXX_FLAGS="/arch:AVX2 /D__AVX2__ /DGGML_USE_AVX2" ^
+          -DCMAKE_C_FLAGS="/arch:AVX2 /D__AVX2__ /DGGML_USE_AVX2" ^
           -DCMAKE_CUDA_COMPILER="%CUDA_PATH%/bin/nvcc.exe" ^
           -DGGML_BUILD_TESTS=OFF ^
           -DGGML_BUILD_EXAMPLES=OFF
