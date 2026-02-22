@@ -1,10 +1,9 @@
-name: IK-Llama-EPYC-5070Ti-Blackwell-LargeModel
+name: IK-Llama-Epyc-5070Ti-Blackwell-Native
 on: workflow_dispatch
 
 jobs:
   build-windows:
     runs-on: windows-latest
-
     steps:
     - name: Checkout Code (Iwan's Fork)
       uses: actions/checkout@v4
@@ -14,64 +13,45 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
-    - name: Install CUDA Toolkit 12.8
-      uses: Jimver/cuda-toolkit@v0.2.30
+    - name: Install CUDA Toolkit 13.1
+      uses: Jimver/cuda-toolkit@v0.2.30  # Check for latest action version
       with:
-        cuda: '12.8.0'
+        cuda: '13.1.0'                   # CRITICAL: Targets Blackwell Native
         method: 'network'
 
     - name: Setup MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Install OpenBLAS via vcpkg
-      shell: cmd
-      run: |
-        vcpkg install openblas:x64-windows-static
-        echo OPENBLAS_INCLUDE=C:/vcpkg/installed/x64-windows-static/include >> %GITHUB_ENV%
-        echo OPENBLAS_LIB=C:/vcpkg/installed/x64-windows-static/lib/openblas.lib >> %GITHUB_ENV%
-
-    - name: Configure CMake
+    - name: Configure CMake (Blackwell sm_120 + Epyc AVX2 Optimized)
       shell: cmd
       run: |
         cmake -B build -G "Visual Studio 17 2022" -A x64 ^
           -DGGML_CUDA=ON ^
-          -DCMAKE_CUDA_ARCHITECTURES="120" ^
+          -DCMAKE_CUDA_ARCHITECTURES="86;89;120" ^
           -DGGML_CUDA_F16=ON ^
-          -DGGML_CUDA_FORCE_MMQ=OFF ^
           -DGGML_FLASH_ATTN=ON ^
           -DGGML_CUDA_FA_ALL_QUANTS=ON ^
           -DGGML_IQK_FA_ALL_QUANTS=ON ^
           -DGGML_STATIC=ON ^
           -DBUILD_SHARED_LIBS=OFF ^
-          -DCUDAToolkit_ROOT="%CUDA_PATH%" ^
-          -DCMAKE_CUDA_COMPILER="%CUDA_PATH%/bin/nvcc.exe" ^
-          -DCMAKE_CUDA_FLAGS="-cudart static --threads 4" ^
-          -DGGML_BLAS=ON ^
-          -DGGML_BLAS_VENDOR=OpenBLAS ^
-          -DBLAS_LIBRARIES="%OPENBLAS_LIB%" ^
-          -DBLAS_INCLUDE_DIRS="%OPENBLAS_INCLUDE%" ^
-          -DLLAMA_NATIVE=OFF ^
+          -DLLAMA_NATIVE=ON ^
+          -DCMAKE_CXX_FLAGS="/arch:AVX2" ^
+          -DCMAKE_C_FLAGS="/arch:AVX2" ^
           -DGGML_AVX2=ON ^
           -DGGML_FMA=ON ^
           -DGGML_F16C=ON ^
           -DGGML_AVX512=OFF ^
-          -DGGML_AVX512_VNNI=OFF ^
-          -DGGML_AVX512_VBMI=OFF ^
-          -DGGML_AVX512_BF16=OFF ^
-          -DLLAMA_LTO=OFF ^
-          -DGGML_LTO=OFF ^
+          -DCMAKE_CUDA_COMPILER="%CUDA_PATH%/bin/nvcc.exe" ^
           -DGGML_BUILD_TESTS=OFF ^
-          -DGGML_BUILD_EXAMPLES=OFF ^
-          -DLLAMA_CURL=OFF
-
-    - name: Build llama-server
-      run: cmake --build build --config Release --target llama-server -j 64
+          -DGGML_BUILD_EXAMPLES=OFF
+    - name: Build ik_llama (Parallel)
+      run: cmake --build build --config Release --target llama-server -j 8
 
     - name: Build llama-bench
-      run: cmake --build build --config Release --target llama-bench -j 64
+      run: cmake --build build --config Release --target llama-bench -j 8
 
-    - name: Upload Artifacts
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ik-llama-epyc-blackwell-largemodel
+        name: ik-llama-epyc-blackwell
         path: build/bin/Release/*.exe
